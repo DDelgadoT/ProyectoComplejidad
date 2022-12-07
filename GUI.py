@@ -6,23 +6,27 @@ def getInfoOfCities():
     tamañoMatriz = int(textCiudades.get("1.0",'2.0-1c')) # Lee la primera linea
     cantidadCiudades = int(textCiudades.get("2.0",'3.0-1c')) # Lee la segunda linea
     textoCiudades = textCiudades.get("3.0",'end-1c').replace('\n',' ').split(" ") # Limpia las lineas de las ciudades
+    textoCiudades = [x for x in textoCiudades if x != ''] # Limpieza de espacios vacios que queden si se escribe mal una ciudad
     ciudades = [textoCiudades[i:i + 3] for i in range(0, len(textoCiudades), 3)] # Separa en listas de 3 la lista donde esta toda la información de las ciudades
     return tamañoMatriz, cantidadCiudades, ciudades
 
 def optimizar():
     tamañoMatriz, _, ciudades = getInfoOfCities()
     z, differentThan = "", ""
-    for i in ciudades:
-        z = z + f"abs(x - {i[1]}) + abs(y - {i[2]}) + " # Función a optimizar, que es abs(x1 - x) + abs(y1 - y) que es la distancia Manhattan
-        differentThan += f"constraint (x != {i[1]} \/ y != {i[2]});\n" # Restricción para que ni la X ni la Y sean coordenadas de alguna ciudad
-    z = z[:-3]
-    differentThan = differentThan[:-1]
-    textOptimizacion.insert(tk.END, "var int: x; \nvar int: y; \nvar float: z; \n\n")
-    textOptimizacion.insert(tk.END, f"constraint x >= 0; \nconstraint y >= 0; \nconstraint x < {tamañoMatriz}; \nconstraint y < {tamañoMatriz}; \n\n") # Restricciones triviales
-    textOptimizacion.insert(tk.END, differentThan + "\n\n") # Restricción para evitar que la solución esté en una ciudad
-    textOptimizacion.insert(tk.END, f"z = {z}; \n\n") # Función a optimizar
-    textOptimizacion.insert(tk.END, "solve minimize z; \n\n")
-    textOptimizacion.insert(tk.END, "output[\"X: \", show(x), \" Y: \", show(y)];")
+    try:
+        for i in ciudades:
+            z = z + f"abs(x - {i[1]}) + abs(y - {i[2]}) + " # Función a optimizar, que es abs(x1 - x) + abs(y1 - y) que es la distancia Manhattan
+            differentThan += f"constraint (x != {i[1]} \/ y != {i[2]});\n" # Restricción para que ni la X ni la Y sean coordenadas de alguna ciudad
+        z = z[:-3]
+        differentThan = differentThan[:-1]
+        textOptimizacion.insert(tk.END, "var int: x; \nvar int: y; \nvar float: z; \n\n")
+        textOptimizacion.insert(tk.END, f"constraint x >= 0; \nconstraint y >= 0; \nconstraint x < {tamañoMatriz}; \nconstraint y < {tamañoMatriz}; \n\n") # Restricciones triviales
+        textOptimizacion.insert(tk.END, differentThan + "\n\n") # Restricción para evitar que la solución esté en una ciudad
+        textOptimizacion.insert(tk.END, f"z = {z}; \n\n") # Función a optimizar
+        textOptimizacion.insert(tk.END, "solve minimize z; \n\n")
+        textOptimizacion.insert(tk.END, "output[\"X: \", show(x), \" Y: \", show(y)];")
+    except:
+        labelErrores.config(text = "Error en la optimización")
 """
 EJEMPLO
 12
@@ -36,13 +40,7 @@ RioFrio 1 2
 def dibujarMatriz():
     canvas.delete("all")
     tamañoMatriz, cantidadCiudades, ciudades = getInfoOfCities()
-    it = iter(ciudades)
-    the_len = len(next(it))
-    if not all(len(l) == the_len for l in it):
-        labelErrores.config(text = "Error")
-    if cantidadCiudades != len(ciudades):
-        labelErrores.config(text = "Error")
-    else:
+    try:
         labelErrores.config(text = "")
         tamanoCuadrados = sizeRectangle/tamañoMatriz
         for i in range(tamañoMatriz):
@@ -64,6 +62,8 @@ def dibujarMatriz():
             squareSizeX = squarePosX + tamanoCuadrados
             squareSizeY = squarePosY + tamanoCuadrados
             canvas.create_rectangle(squarePosX, squarePosY, squareSizeX, squareSizeY, width=1, fill=color)
+    except:
+        labelErrores.config(text = "Error en el dibujado")
 # -------------------------------------------------------------
 
 # ------------------------ CREACION INTERFAZ ------------------------
