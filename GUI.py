@@ -3,27 +3,28 @@ import random
 
 # ------------------------ FUNCIONES ------------------------
 def getInfoOfCities():
-    tamañoMatriz = int(textCiudades.get("1.0",'2.0-1c'))
-    cantidadCiudades = int(textCiudades.get("2.0",'3.0-1c'))
-    textoCiudades = textCiudades.get("3.0",'end-1c').replace('\n',' ').split(" ")
-    ciudades = [textoCiudades[i:i + 3] for i in range(0, len(textoCiudades), 3)]
+    tamañoMatriz = int(textCiudades.get("1.0",'2.0-1c')) # Lee la primera linea
+    cantidadCiudades = int(textCiudades.get("2.0",'3.0-1c')) # Lee la segunda linea
+    textoCiudades = textCiudades.get("3.0",'end-1c').replace('\n',' ').split(" ") # Limpia las lineas de las ciudades
+    ciudades = [textoCiudades[i:i + 3] for i in range(0, len(textoCiudades), 3)] # Separa en listas de 3 la lista donde esta toda la información de las ciudades
     return tamañoMatriz, cantidadCiudades, ciudades
 
 def optimizar():
     tamañoMatriz, _, ciudades = getInfoOfCities()
     z, differentThan = "", ""
     for i in ciudades:
-        z = z + f"abs(x - {i[1]}) + abs(y - {i[2]}) + "
-        differentThan += f"constraint (x != {i[1]} \/ y != {i[2]});\n"
+        z = z + f"abs(x - {i[1]}) + abs(y - {i[2]}) + " # Función a optimizar, que es abs(x1 - x) + abs(y1 - y) que es la distancia Manhattan
+        differentThan += f"constraint (x != {i[1]} \/ y != {i[2]});\n" # Restricción para que ni la X ni la Y sean coordenadas de alguna ciudad
     z = z[:-3]
     differentThan = differentThan[:-1]
     textOptimizacion.insert(tk.END, "var int: x; \nvar int: y; \nvar float: z; \n\n")
-    textOptimizacion.insert(tk.END, f"constraint x >= 0; \nconstraint y >= 0; \nconstraint x < {tamañoMatriz}; \nconstraint y < {tamañoMatriz}; \n\n")
-    textOptimizacion.insert(tk.END, differentThan + "\n\n")
-    textOptimizacion.insert(tk.END, f"z = {z}; \n\n")   
+    textOptimizacion.insert(tk.END, f"constraint x >= 0; \nconstraint y >= 0; \nconstraint x < {tamañoMatriz}; \nconstraint y < {tamañoMatriz}; \n\n") # Restricciones triviales
+    textOptimizacion.insert(tk.END, differentThan + "\n\n") # Restricción para evitar que la solución esté en una ciudad
+    textOptimizacion.insert(tk.END, f"z = {z}; \n\n") # Función a optimizar
     textOptimizacion.insert(tk.END, "solve minimize z; \n\n")
     textOptimizacion.insert(tk.END, "output[\"X: \", show(x), \" Y: \", show(y)];")
 """
+EJEMPLO
 12
 5
 Palmira 2 3
@@ -32,8 +33,6 @@ Buga 11 0
 Tulua 0 3
 RioFrio 1 2
 """
-
-
 def dibujarMatriz():
     canvas.delete("all")
     tamañoMatriz, cantidadCiudades, ciudades = getInfoOfCities()
@@ -55,6 +54,7 @@ def dibujarMatriz():
                 canvas.create_rectangle(squarePosX, squarePosY, squareSizeX, squareSizeY, width=1, fill="#FFFFFF")
         for i in ciudades:
             for j in range(3):
+                # Generación de colores aleatorios
                 r = "%02x"%random.randint(0,255)
                 g = "%02x"%random.randint(0,255)
                 b = "%02x"%random.randint(0,255)
