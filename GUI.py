@@ -58,7 +58,7 @@ def dibujarMatriz():
                 b = "%02x"%random.randint(0,255)
                 color="#"+r+g+b
             squarePosX = int(i[1]) * tamanoCuadrados
-            squarePosY = int(i[2]) * tamanoCuadrados
+            squarePosY = (tamañoMatriz - int(i[2]) - 1) * tamanoCuadrados
             squareSizeX = squarePosX + tamanoCuadrados
             squareSizeY = squarePosY + tamanoCuadrados
             canvas.create_rectangle(squarePosX, squarePosY, squareSizeX, squareSizeY, width=1, fill=color)
